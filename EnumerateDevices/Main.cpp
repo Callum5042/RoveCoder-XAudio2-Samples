@@ -2,15 +2,6 @@
 #include <xaudio2.h>
 #include <Windows.h>
 
-//#include <wrl\client.h>
-//
-//#include <Windows.Devices.Enumeration.h>
-//#include <wrl.h>
-//#include <ppltasks.h>
-
-//#pragma comment(lib,"xaudio2.lib")
-//#pragma comment(lib,"runtimeobject.lib")
-
 #include <windows.h>
 #include <mmdeviceapi.h>
 #include <endpointvolume.h>
@@ -18,8 +9,6 @@
 
 void DisplayAudioDevices()
 {
-    HRESULT hr = S_OK;
-
     IMMDeviceEnumerator* enumerator = nullptr;
     if (CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&enumerator) != S_OK)
     {
