@@ -1,9 +1,9 @@
 #include <iostream>
-#include <xaudio2.h>
-#include <Windows.h>
 #include <fstream>
 #include <vector>
-#include <string>
+
+#include <Windows.h>
+#include <xaudio2.h>
 
 enum class FourCC
 {
@@ -56,7 +56,7 @@ WAVEFORMATEXTENSIBLE WaveScanWFX(std::ifstream& file)
 			int chunk_size = 0;
 			file.read(reinterpret_cast<char*>(&chunk_size), sizeof(chunk_size));
 
-			WAVEFORMATEXTENSIBLE wfx;
+			WAVEFORMATEXTENSIBLE wfx = {};
 			file.read(reinterpret_cast<char*>(&wfx), sizeof(WAVEFORMATEXTENSIBLE));
 
 			return wfx;
@@ -93,20 +93,19 @@ static HRESULT PlayWav(IXAudio2* audio, LPCWSTR fileName)
 	file.seekg(0, std::ios::beg);
 
 	WaveScanType(file);
-	WAVEFORMATEXTENSIBLE wfx1 = WaveScanWFX(file);
-	std::vector<BYTE> buffer23 = WaveScanBuffer(file);
+	WAVEFORMATEXTENSIBLE wfx = WaveScanWFX(file);
+	std::vector<BYTE> audio_buffer = WaveScanBuffer(file);
 
 	// Create audio source buffer
 	XAUDIO2_BUFFER buffer = { 0 };
-	buffer.AudioBytes = buffer23.size();  //size of the audio buffer in bytes
-	buffer.pAudioData = buffer23.data();  //buffer containing audio data
-	buffer.Flags = XAUDIO2_END_OF_STREAM; // tell the source voice not to expect any data after this buffer
+	buffer.AudioBytes = static_cast<UINT32>(audio_buffer.size());
+	buffer.pAudioData = audio_buffer.data();
 
 	// Create source voice
 	IXAudio2SourceVoice* pSourceVoice = nullptr;
-	audio->CreateSourceVoice(&pSourceVoice, (WAVEFORMATEX*)&wfx1);
+	audio->CreateSourceVoice(&pSourceVoice, reinterpret_cast<WAVEFORMATEX*>(&wfx));
 	pSourceVoice->SubmitSourceBuffer(&buffer);
-	pSourceVoice->Start(0);
+	pSourceVoice->Start();
 
 	// Loop until sound is finished
 	while (true)
