@@ -9,6 +9,33 @@
 const UINT32 sampleRate = 44100;
 const float frequency = 440.0f; // 440 Hz
 
+static void GenerateSquareWave(float* buffer, UINT32 numSamples)
+{
+	for (UINT32 i = 0; i < numSamples; ++i)
+	{
+		float t = static_cast<float>(i) / sampleRate;
+		buffer[i] = (sin(2 * 3.14159f * frequency * t) >= 0) ? 1.0f : -1.0f;
+	}
+}
+
+static void GenerateSawtoothWave(float* buffer, UINT32 numSamples)
+{
+	for (UINT32 i = 0; i < numSamples; ++i)
+	{
+		float t = static_cast<float>(i) / sampleRate;
+		buffer[i] = 2.0f * (t * frequency - floor(0.5f + t * frequency));
+	}
+}
+
+static void GenerateTriangleWave(float* buffer, UINT32 numSamples)
+{
+	for (UINT32 i = 0; i < numSamples; ++i)
+	{
+		float t = static_cast<float>(i) / sampleRate;
+		buffer[i] = 2.0f * fabs(2 * (t - floor(t + 0.5f))) - 1.0f;
+	}
+}
+
 static void GenerateSineWave(float* buffer, UINT32 numSamples)
 {
 	for (UINT32 i = 0; i < numSamples; ++i)
@@ -18,11 +45,23 @@ static void GenerateSineWave(float* buffer, UINT32 numSamples)
 	}
 }
 
+static void GenerateWhiteNoise(float* buffer, UINT32 numSamples)
+{
+	// Seed the random number generator
+	srand(static_cast<unsigned int>(time(NULL)));
+
+	for (UINT32 i = 0; i < numSamples; ++i)
+	{
+		// Generate a random number between -1 and 1
+		buffer[i] = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2.0f - 1.0f;
+	}
+}
+
 static void PlayBasicSound(IXAudio2* audio)
 {
 	std::vector<float> audio_buffer;
 	audio_buffer.resize(sampleRate);
-	GenerateSineWave(audio_buffer.data(), sampleRate);
+	GenerateWhiteNoise(audio_buffer.data(), sampleRate);
 
 	WAVEFORMATEX waveFormat = {};
 	waveFormat.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
