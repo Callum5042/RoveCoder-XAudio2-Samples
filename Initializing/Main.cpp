@@ -13,7 +13,7 @@ int main(int args, char** argv)
 
     // Initialize XAudio2 - XAudio2 can also be wrapped in a ComPtr
     IXAudio2* xaudio2 = nullptr;
-    if (XAudio2Create(&xaudio2) != S_OK)
+    if (XAudio2Create(&xaudio2, XAUDIO2_DEBUG_ENGINE, XAUDIO2_USE_DEFAULT_PROCESSOR) != S_OK)
     {
         std::cerr << "XAudio2Create failed\n";
         CoUninitialize();

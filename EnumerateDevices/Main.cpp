@@ -2,9 +2,7 @@
 #include <xaudio2.h>
 #include <Windows.h>
 
-#include <windows.h>
 #include <mmdeviceapi.h>
-#include <endpointvolume.h>
 #include <functiondiscoverykeys_devpkey.h>
 
 void DisplayAudioDevices()
@@ -30,29 +28,24 @@ void DisplayAudioDevices()
         IMMDevice* device = nullptr;
         collection->Item(i, &device);
 
-        // Get device properties
-        LPWSTR pwszID = NULL;
-        device->GetId(&pwszID);
-
-        // Do something with device ID
+        // Get device properties store
         IPropertyStore* property_store = nullptr;
         if (device->OpenPropertyStore(STGM_READ, &property_store) != S_OK)
         {
-            CoTaskMemFree(pwszID);
             device->Release();
             continue;
         }
 
-        PROPVARIANT varName;
-        PropVariantInit(&varName);
-        if (property_store->GetValue(PKEY_Device_FriendlyName, &varName) == S_OK)
+        // Get device name
+        PROPVARIANT property;
+        PropVariantInit(&property);
+        if (property_store->GetValue(PKEY_Device_FriendlyName, &property) == S_OK)
         {
-            std::wcout << L"Device: " << varName.pwszVal << '\n';
-            PropVariantClear(&varName);
+            std::wcout << L"Device: " << property.pwszVal << '\n';
+            PropVariantClear(&property);
         }
 
         // Release resources
-        CoTaskMemFree(pwszID);
         device->Release();
     }
 
@@ -88,7 +81,7 @@ int main(int args, char** argv)
         return -1;
     }
 
-	std::cout << "XAudio2 successfully initialized\n";
+	std::cout << "XAudio2 successfully initialized\n\n";
     DisplayAudioDevices();
 
     // Cleanup
